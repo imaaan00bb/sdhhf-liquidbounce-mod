@@ -1,0 +1,86 @@
+local uis = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local liquidbounce = {}
+liquidbounce.__index = liquidbounce
+
+local modulesfolder
+local bg = Instance.new("BlurEffect")
+local guiscale = Instance.new("UIScale")
+local props = game:GetObjects("rbxassetid://17901186362")[1]:Clone()
+
+
+if uis.TouchEnabled then
+    local epicButton = Instance.new("TextButton")
+    epicButton.Parent = game:GetService("CoreGui")
+    epicButton.Text = "T"
+    epicButton.Size = UDim2.new(0, 50, 0, 50)
+    epicButton.Position = UDim2.new(0, 10, 0, 10)
+    epicButton.BackgroundColor3 = Color3.new(0, 0, 0)
+    epicButton.TextColor3 = Color3.new(1, 1, 1)
+    epicButton.Font = Enum.Font.SourceSansBold
+    epicButton.TextSize = 20
+    epicButton.Name = "EpicMobileButton"
+
+    local guiVisible = true
+    epicButton.MouseButton1Click:Connect(function()
+        guiVisible = not guiVisible
+        local guis = game:GetService("CoreGui"):GetChildren()
+        for _, gui in pairs(guis) do
+            if gui:IsA("ScreenGui") and gui.Name ~= "EpicMobileButton" then
+                gui.Enabled = guiVisible
+            end
+        end
+    end)
+end
+
+function liquidbounce.new()
+    local self = setmetatable({}, liquidbounce)
+    self.objects = {}
+    self.root = Instance.new("ScreenGui")
+    self.root.IgnoreGuiInset = true
+    self.root.Name = "liquidbounce"
+    self.root.ResetOnSpawn = false
+    guiscale.Scale = 1
+    guiscale.Parent = self.root
+    bg.Size = 50
+    bg.Parent = game:GetService("Lighting")
+
+    local background = props.Background:Clone()
+    local notification = props.NotificationContainer and props.NotificationContainer:Clone()
+    notification.Position = UDim2.new(0.78399986, 0, 0.304609954, 0)
+    notification.Parent = self.root
+
+    modulesfolder = Instance.new("Folder")
+    modulesfolder.Name = "Modules"
+    modulesfolder.Parent = self.root
+
+    background.Parent = self.root
+    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    self.root.Parent = (gethui and gethui()) or game:GetService("CoreGui"):FindFirstChild("RobloxGui")
+
+    local function showmodules()
+        local ti = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+        for _, v in pairs(modulesfolder:GetChildren()) do
+            if v:IsA("Frame") or v:IsA("GuiObject") then
+                v.Visible = not v.Visible
+                local bgsize = v.Visible and 50 or 0
+                local guis = v.Visible and 1 or 0
+                game:GetService("TweenService"):Create(bg, ti, { Size = bgsize }):Play()
+                game:GetService("TweenService"):Create(guiscale, ti, { Scale = guis }):Play()
+                background.Visible = not background.Visible
+            end
+        end
+    end
+
+    uis.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.LeftControl then
+            showmodules()
+        end
+    end)
+
+    return self
+end
+
+
+return liquidbounce
